@@ -1,0 +1,41 @@
+# Scala/SBT
+target/
+project/target/
+project/project/
+.bsp/
+.metals/
+.bloop/
+metals.sbt
+.scala-build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.class
+*.jar
+*.log
+
+# Generated files
+*.c
+*.asm
+*.o
+*.bin
+*.elf
+
+# Test artifacts
+test-output/
+
+# Secrets
+.env
+*.pem
+*.key

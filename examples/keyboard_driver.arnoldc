@@ -1,0 +1,112 @@
+LISTEN TO ME VERY CAREFULLY keyboardHandler
+I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MOTORCYCLE intNum
+    THIS IS A WARRIOR
+    
+    HEY CHRISTMAS TREE scancode
+    THIS IS A TINY WARRIOR
+    YOU SET US UP 0
+    
+    GET YOUR ASS TO MARS scancode
+    LISTEN TO THE PORT 0x60
+    DO IT NOW
+    
+    BECAUSE I'M GOING TO SAY PLEASE scancode
+        LET OFF SOME STEAM BENNET 0x80
+        
+        WHAT'S THE CHOICE scancode
+        WHEN IT'S 0x1E
+            TALK TO THE HAND "A pressed"
+            GET OUT
+        WHEN IT'S 0x30
+            TALK TO THE HAND "B pressed"
+            GET OUT
+        WHEN IT'S 0x2E
+            TALK TO THE HAND "C pressed"
+            GET OUT
+        WHEN IT'S 0x01
+            TALK TO THE HAND "ESC pressed - GET TO THE CHOPPER!"
+            GET OUT
+        OTHERWISE
+            TALK TO THE HAND scancode
+        NO MORE CHOICES
+    YOU HAVE NO RESPECT FOR LOGIC
+    
+    TALK TO THE PORT 0x20 0x20
+    
+HASTA LA VISTA, BABY
+
+LISTEN TO ME VERY CAREFULLY initKeyboard
+    
+    HEY CHRISTMAS TREE status
+    THIS IS A TINY WARRIOR
+    YOU SET US UP 0
+    
+    TALK TO THE HAND "Initializing keyboard - LISTEN TO ME VERY CAREFULLY"
+    
+    STICK AROUND @NO PROBLEMO
+        GET YOUR ASS TO MARS status
+        LISTEN TO THE PORT 0x64
+        DO IT NOW
+        
+        GET TO THE CHOPPER status
+        HERE IS MY INVITATION status
+        CRUSH THEM TOGETHER 0x02
+        ENOUGH TALK
+        
+        BECAUSE I'M GOING TO SAY PLEASE status
+            YOU ARE NOT YOU YOU ARE ME 0
+            GET OUT
+        YOU HAVE NO RESPECT FOR LOGIC
+        
+        WAIT A MOMENT
+    CHILL
+    
+    TALK TO THE PORT 0x60 0xF4
+    
+    HEY CHRISTMAS TREE response
+    THIS IS A TINY WARRIOR
+    YOU SET US UP 0
+    
+    I'LL COUNT FROM i 0 TO 1000 COUNT BY 1
+        GET YOUR ASS TO MARS status
+        LISTEN TO THE PORT 0x64
+        DO IT NOW
+        
+        GET TO THE CHOPPER status
+        HERE IS MY INVITATION status
+        CRUSH THEM TOGETHER 0x01
+        ENOUGH TALK
+        
+        BECAUSE I'M GOING TO SAY PLEASE status
+            GET YOUR ASS TO MARS response
+            LISTEN TO THE PORT 0x60
+            DO IT NOW
+            
+            BECAUSE I'M GOING TO SAY PLEASE response
+                YOU ARE NOT YOU YOU ARE ME 0xFA
+                TALK TO THE HAND "Keyboard ACK received - NO PROBLEMO"
+                GET OUT
+            YOU HAVE NO RESPECT FOR LOGIC
+        YOU HAVE NO RESPECT FOR LOGIC
+    STOP COUNTING
+    
+    TALK TO THE HAND "Keyboard initialized - I'LL BE BACK"
+    
+HASTA LA VISTA, BABY
+
+IT'S SHOWTIME
+
+TALK TO THE HAND "ArnoldC Keyboard Driver"
+TALK TO THE HAND "GET TO THE CHOPPER... and press some keys!"
+
+EVERYBODY CHILL
+
+DO IT NOW initKeyboard
+
+LET'S PARTY
+
+STICK AROUND @NO PROBLEMO
+    SLEEP NOW
+CHILL
+
+YOU HAVE BEEN TERMINATED
