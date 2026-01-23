@@ -111,6 +111,13 @@ case class UnionRefType(unionName: String) extends TypeSpec {
   val isSigned = false
 }
 
+// Enum type reference
+case class EnumRefType(enumName: String) extends TypeSpec {
+  val toCType = s"enum $enumName"
+  val size = 4
+  val isSigned = false
+}
+
 // Function pointer type - "REMEMBER THIS MOVE"
 case class FunctionPointerType(
   returnType: TypeSpec,

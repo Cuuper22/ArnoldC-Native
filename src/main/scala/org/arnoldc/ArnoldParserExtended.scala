@@ -81,7 +81,7 @@ class ArnoldParserExtended extends Parser {
 
   // ===== STRUCT/UNION KEYWORDS =====
   val StructBegin = "THIS IS WHAT I AM"
-  val StructMember = "THIS IS WHAT I'M MADE OF"
+  val StructMemberKeyword = "THIS IS WHAT I'M MADE OF"
   val StructEnd = "I'M DONE DESCRIBING MYSELF"
   val UnionBegin = "THIS IS MY DISGUISE"
   val UnionMember = "I CAN LOOK LIKE"
@@ -156,7 +156,7 @@ class ArnoldParserExtended extends Parser {
   val MemCopyTo = "TO"
   val MemSet = "FILL WITH"
   val Sizeof = "HOW BIG IS"
-  val SizeofExpr = "HOW BIG IS THAT"
+  val SizeofExprKeyword = "HOW BIG IS THAT"
   val Cast = "MAKE IT A"
 
   // ===== I/O PORT KEYWORDS =====
@@ -201,14 +201,19 @@ class ArnoldParserExtended extends Parser {
   // ===== ROOT GRAMMAR =====
   
   def Root: Rule1[RootNode] = rule {
-    OptEOL ~ zeroOrMore(GlobalDeclaration) ~ oneOrMore(AbstractMethod) ~ EOI ~~> { 
-      (globals: List[AstNode], methods: List[AbstractMethodNode]) => 
-        RootNode(methods)  // TODO: handle globals properly
+    OptEOL ~ zeroOrMore(GlobalDeclaration) ~ oneOrMore(AbstractMethodOrComment) ~ EOI ~~> {
+      (globals: List[AstNode], methodNodes: List[AstNode]) =>
+        RootNode(globals, methodNodes.collect { case m: AbstractMethodNode => m })
     }
   }
 
+  def AbstractMethodOrComment: Rule1[AstNode] = rule {
+    AbstractMethod | CommentStatement
+  }
+
   def GlobalDeclaration: Rule1[AstNode] = rule {
-    PreprocessorDirective | StructDefinition | UnionDefinition | EnumDefinition | GlobalVariable
+    PreprocessorDirective | StructDefinition | UnionDefinition | EnumDefinition |
+    ArrayDeclareStatement | CommentStatement | GlobalVariable
   }
 
   def GlobalVariable: Rule1[AstNode] = rule {
@@ -259,7 +264,7 @@ class ArnoldParserExtended extends Parser {
   }
 
   def StructMemberDef: Rule1[StructMember] = rule {
-    StructMember ~ WhiteSpace ~ VariableName ~> (s => s) ~ EOL ~
+    StructMemberKeyword ~ WhiteSpace ~ VariableName ~> (s => s) ~ EOL ~
     TypeSpecification ~ EOL ~~> { (name: String, typeSpec: TypeSpec) =>
       StructMember(name, typeSpec)
     }
@@ -375,16 +380,21 @@ class ArnoldParserExtended extends Parser {
   def Method: Rule1[AbstractMethodNode] = rule {
     DeclareMethod ~ WhiteSpace ~ VariableName ~> (s => s) ~ EOL ~
     zeroOrMore(MethodParam) ~
-    optional(MethodReturnType) ~> ((m: Option[Boolean]) => m.getOrElse(false)) ~
-    zeroOrMore(Statement) ~ EndMethodDeclaration ~~> MethodNode
+    optional(MethodReturnType) ~
+    zeroOrMore(Statement) ~ EndMethodDeclaration ~~> {
+      (name: String, args: List[VariableNode], returnsOpt: Option[Boolean], statements: List[StatementNode]) =>
+        MethodNode(name, args, returnsOpt.getOrElse(false), statements)
+    }
   }
 
   def MethodParam: Rule1[VariableNode] = rule {
-    MethodArguments ~ WhiteSpace ~ Variable ~ optional(EOL ~ TypeSpecification) ~ EOL
+    MethodArguments ~ WhiteSpace ~ Variable ~ optional(EOL ~ TypeSpecification) ~~> {
+      (variable: VariableNode, _: Option[TypeSpec]) => variable
+    } ~ EOL
   }
 
   def MethodReturnType: Rule1[Boolean] = rule {
-    NonVoidMethod ~ optional(EOL ~ TypeSpecification) ~ EOL ~> (_ => true)
+    NonVoidMethod ~ EOL ~> (_ => true)
   }
 
   // ===== STATEMENTS =====
@@ -430,7 +440,7 @@ class ArnoldParserExtended extends Parser {
   def TypedDeclareStatement: Rule1[TypedDeclareNode] = rule {
     DeclareInt ~ WhiteSpace ~ VariableName ~> (s => s) ~ EOL ~
     TypeSpecification ~ EOL ~
-    SetInitialValue ~ WhiteSpace ~ Expression ~~> TypedDeclareNode ~ EOL
+    SetInitialValue ~ WhiteSpace ~ ExtendedOperand ~~> TypedDeclareNode ~ EOL
   }
 
   def ArrayDeclareStatement: Rule1[ArrayDeclareNode] = rule {
@@ -459,8 +469,16 @@ class ArnoldParserExtended extends Parser {
     } ~ EOL
   }
 
+  def ArrayInitSeparator: Rule0 = rule {
+    oneOrMore(" " | "\t" | "\r" | "\n")
+  }
+
+  def ArrayInitOperand: Rule1[OperandNode] = rule {
+    NullLiteral | HexNumber | BinaryNumber | Number | Boolean | CharLiteral
+  }
+
   def ArrayInitValues: Rule1[List[OperandNode]] = rule {
-    Operand ~ zeroOrMore(WhiteSpace ~ Operand) ~~> { (first: OperandNode, rest: List[OperandNode]) =>
+    ArrayInitOperand ~ zeroOrMore(ArrayInitSeparator ~ ArrayInitOperand) ~~> { (first: OperandNode, rest: List[OperandNode]) =>
       first :: rest
     }
   }
@@ -578,7 +596,7 @@ class ArnoldParserExtended extends Parser {
 
   def SizeofExpr: Rule1[OperandNode] = rule {
     Sizeof ~ WhiteSpace ~ TypeSpecification ~~> SizeofTypeNode |
-    SizeofExpr ~ WhiteSpace ~ VariableName ~> (v => SizeofExprNode(v))
+    SizeofExprKeyword ~ WhiteSpace ~ VariableName ~> (v => SizeofExprNode(v))
   }
 
   def AllocExpr: Rule1[AllocNode] = rule {
@@ -613,11 +631,11 @@ class ArnoldParserExtended extends Parser {
     ModuloExpression ~~> ModuloExpressionNode
   }
 
-  def PlusExpression: Rule1[AstNode] = rule { PlusOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def MinusExpression: Rule1[AstNode] = rule { MinusOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def MultiplicationExpression: Rule1[AstNode] = rule { MultiplicationOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def DivisionExpression: Rule1[AstNode] = rule { DivisionOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def ModuloExpression: Rule1[AstNode] = rule { Modulo ~ WhiteSpace ~ Operand ~ EOL }
+  def PlusExpression: Rule1[OperandNode] = rule { PlusOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def MinusExpression: Rule1[OperandNode] = rule { MinusOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def MultiplicationExpression: Rule1[OperandNode] = rule { MultiplicationOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def DivisionExpression: Rule1[OperandNode] = rule { DivisionOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def ModuloExpression: Rule1[OperandNode] = rule { Modulo ~ WhiteSpace ~ Operand ~ EOL }
 
   // ===== LOGICAL OPERATIONS =====
 
@@ -815,7 +833,8 @@ class ArnoldParserExtended extends Parser {
   def MemWriteStatement: Rule1[MemoryWriteNode] = rule {
     MemWrite ~ WhiteSpace ~ Operand ~ EOL ~
     TypeSpecification ~ EOL ~
-    SetValue ~ WhiteSpace ~ Operand ~ EndAssignVariable ~ EOL ~~> MemoryWriteNode
+    SetValue ~ WhiteSpace ~ Operand ~ EOL ~
+    EndAssignVariable ~ EOL ~~> MemoryWriteNode
   }
 
   // ===== FUNCTION POINTERS =====

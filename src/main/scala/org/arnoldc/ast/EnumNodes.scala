@@ -49,12 +49,6 @@ case class EnumDeclareNode(
   def generate(mv: MethodVisitor, symbolTable: SymbolTable) = {}
 }
 
-// Enum reference type (for type specifications)
-case class EnumRefType(enumName: String) extends TypeSpec {
-  def size: Int = 4  // Typically 4 bytes
-  def toCType: String = s"enum $enumName"
-}
-
 // Enum value access - getting the integer value of an enum constant
 case class EnumValueAccessNode(
   enumName: String,

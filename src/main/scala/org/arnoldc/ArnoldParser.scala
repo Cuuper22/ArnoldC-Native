@@ -45,7 +45,9 @@ class ArnoldParser extends Parser {
   val WhiteSpace = oneOrMore(" " | "\t")
 
   def Root: Rule1[RootNode] = rule {
-    oneOrMore(AbstractMethod) ~ EOI ~~> RootNode
+    oneOrMore(AbstractMethod) ~ EOI ~~> { (methods: List[AbstractMethodNode]) =>
+      RootNode(Nil, methods)
+    }
   }
 
   def AbstractMethod: Rule1[AbstractMethodNode] = rule {
@@ -133,11 +135,11 @@ class ArnoldParser extends Parser {
     SetValue ~ WhiteSpace ~ Operand ~ EOL
   }
 
-  def PlusExpression: Rule1[AstNode] = rule { PlusOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def MinusExpression: Rule1[AstNode] = rule { MinusOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def MultiplicationExpression: Rule1[AstNode] = rule { MultiplicationOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def DivisionExpression: Rule1[AstNode] = rule { DivisionOperator ~ WhiteSpace ~ Operand ~ EOL }
-  def ModuloExpression: Rule1[AstNode] = rule { Modulo ~ WhiteSpace ~ Operand ~ EOL }
+  def PlusExpression: Rule1[OperandNode] = rule { PlusOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def MinusExpression: Rule1[OperandNode] = rule { MinusOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def MultiplicationExpression: Rule1[OperandNode] = rule { MultiplicationOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def DivisionExpression: Rule1[OperandNode] = rule { DivisionOperator ~ WhiteSpace ~ Operand ~ EOL }
+  def ModuloExpression: Rule1[OperandNode] = rule { Modulo ~ WhiteSpace ~ Operand ~ EOL }
 
   def Variable: Rule1[VariableNode] = rule { VariableName ~> VariableNode }
   def VariableName: Rule0 = rule { rule("A" - "Z" | "a" - "z") ~ zeroOrMore("A" - "Z" | "a" - "z" | "0" - "9") }

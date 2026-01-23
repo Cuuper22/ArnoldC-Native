@@ -5,7 +5,7 @@ import org.objectweb.asm.{MethodVisitor, ClassWriter}
 import org.arnoldc.{MethodInformation, SymbolTable}
 import org.arnoldc.native.NativeGenerator
 
-case class RootNode(methods: List[AbstractMethodNode]) extends AstNode {
+case class RootNode(globals: List[AstNode], methods: List[AbstractMethodNode]) extends AstNode {
 
   // Original JVM bytecode generation
   def generateByteCode(filename: String): Array[Byte] = {

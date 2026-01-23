@@ -51,6 +51,9 @@ class NativeGenerator {
     emitRaw("")
     emitRaw("#include \"arnold_runtime.h\"")
     emitRaw("")
+
+    // Collect global declarations
+    collectGlobals(root.globals)
     
     // Generate preprocessor directives (includes, defines, etc.)
     if (preprocessorDirectives.nonEmpty) {
@@ -204,9 +207,9 @@ class NativeGenerator {
   }
   
   private def generateUserMethod(
-    name: String, 
-    args: List[VariableNode], 
-    returnsValue: Boolean, 
+    name: String,
+    args: List[VariableNode],
+    returnsValue: Boolean,
     statements: List[StatementNode]
   ): Unit = {
     val retType = if (returnsValue) "int" else "void"
@@ -225,6 +228,50 @@ class NativeGenerator {
     emitRaw("}")
     emitRaw("/* HASTA LA VISTA, BABY */")
     emitRaw("")
+  }
+
+  private def collectGlobals(globals: List[AstNode]): Unit = {
+    globals.foreach {
+      case d: DefineNode =>
+        preprocessorDirectives += d
+
+      case s: StructDefNode =>
+        structs(s.structName) = s
+
+      case e: EnumDefNode =>
+        enums(e.enumName) = e
+
+      case a: ArrayDeclareNode =>
+        val typeStr = typeToC(a.elementType)
+        a.initialValues match {
+          case Some(values) =>
+            val valsStr = values.map(generateExpression).mkString(", ")
+            globalDecls.append(s"$typeStr ${a.variable}[${a.size}] = {$valsStr};\n")
+          case None =>
+            globalDecls.append(s"$typeStr ${a.variable}[${a.size}];\n")
+        }
+
+      case t: TypedDeclareNode =>
+        val typeStr = typeToC(t.varType)
+        val valCode = generateExpression(t.initialValue)
+        globalDecls.append(s"$typeStr ${t.variable} = $valCode;\n")
+
+      case d: DeclareIntNode =>
+        val valCode = generateExpression(d.value)
+        globalDecls.append(s"int ${d.variable} = $valCode;\n")
+
+      case CommentNode(text) =>
+        globalDecls.append(s"/* $text */\n")
+
+      case MultiLineCommentNode(lines) =>
+        globalDecls.append("/*\n")
+        lines.foreach { line =>
+          globalDecls.append(s" * $line\n")
+        }
+        globalDecls.append(" */\n")
+
+      case _ =>
+    }
   }
   
   private def generateStatement(stmt: StatementNode): Unit = stmt match {
@@ -723,32 +770,7 @@ class NativeGenerator {
    * "DO IT NOW" - Direct assembly output
    */
   def generateAsm(root: RootNode, className: String): String = {
-    val asm = new StringBuilder
-    
-    asm.append("; ArnoldC Native Assembly\n")
-    asm.append("; Generated with love and Arnold quotes\n")
-    asm.append("; \"GET YOUR ASS TO MARS\"\n")
-    asm.append("BITS 32\n")
-    asm.append("section .text\n")
-    asm.append("global _arnold_main\n\n")
-    
-    // Generate assembly for each method
-    root.methods.foreach { method =>
-      asm.append(generateMethodAsm(method))
-    }
-    
-    asm.toString()
-  }
-  
-  private def generateMethodAsm(method: AbstractMethodNode): String = {
-    val asm = new StringBuilder
-    asm.append(s"; Method: ${method.methodName}\n")
-    asm.append(s"_${method.methodName}:\n")
-    asm.append("    push ebp\n")
-    asm.append("    mov ebp, esp\n")
-    asm.append("    ; TODO: full method body generation\n")
-    asm.append("    pop ebp\n")
-    asm.append("    ret\n\n")
-    asm.toString()
+    val generator = new AsmGenerator()
+    generator.generate(root)
   }
 }
