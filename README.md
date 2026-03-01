@@ -252,6 +252,44 @@ make run
 - JVM output identical to original compiler
 - `-native` and `-kernel` are additive features
 
+## Known Limitations
+
+### JVM Backend Compatibility
+- The JVM backend (default mode, `-run`) only supports **original ArnoldC syntax**
+- New native-mode keywords (memory ops, port I/O, inline assembly, etc.) will **fail** in JVM mode
+- To use extended features, you must compile with `-native`, `-asm`, or `-kernel` flags
+- Reason: JVM bytecode cannot represent raw memory access or hardware instructions
+
+### Planned But Unparseable AST Nodes
+- The codebase defines ~194 AST node classes, but only ~46 have parser rules
+- The remaining ~150 nodes are **planned future extensions** and currently unparseable
+- Categories of planned nodes (not yet implemented in parser):
+  - Advanced bitwise operations (bit set/clear/toggle, masks, rotation, population count)
+  - CPU-specific instructions (CPUID, RDTSC, RDMSR, WRMSR, control register access)
+  - Advanced control flow (else-if chains, infinite loops, panic/assert)
+  - Function attributes (inline, noreturn, aligned, static, section, ISR handlers)
+  - Advanced preprocessor directives (elif, conditional compilation, line directives)
+  - Advanced assembly (page table operations, memory fences, TLB invalidation)
+  - Type system extensions (typedefs, bitfields, packed structs, anonymous structs)
+  - Advanced arrays (dynamic arrays, slices, nested initializers, extern declarations)
+  - Callback registration system
+  - Documentation comments
+- See `src/main/scala/org/arnoldc/ast/AstNode.scala` for the full list
+- **If you need these features**, you must add parser rules to `ArnoldParserExtended.scala`
+
+### Kernel Mode Limitations
+- Kernel mode (`-kernel` flag) generates a Makefile that requires:
+  - `i686-elf-gcc` cross-compiler (not standard GCC)
+  - `linker.ld` file (must be created manually - not auto-generated)
+  - NASM assembler for any assembly components
+- The generated Makefile is a template and may need customization for your kernel
+- QEMU testing (`make run`) assumes a multiboot-compatible kernel structure
+
+### Current Working Feature Set
+- For the **definitive list of working keywords**, see the tables in the README
+- All keywords in the "New Keywords for Kernel Programming" section work in `-native`/`-asm`/`-kernel` modes
+- Original ArnoldC keywords work in all modes (JVM and native)
+
 ## Contributing
 
 1. Fork this repo

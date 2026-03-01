@@ -23,6 +23,12 @@ object ArnoldC {
   val VERSION = "1.0.0-NATIVE"
   
   def main(args: Array[String]) {
+    if (args.contains("-version") || args.contains("--version")) {
+      println(s"ArnoldC Compiler v$VERSION")
+      println("\"I'LL BE BACK\"")
+      return
+    }
+
     if (args.length < 1 || args.contains("-help") || args.contains("--help")) {
       printUsage()
       return
@@ -30,9 +36,27 @@ object ArnoldC {
     
     val command = getCommandFromArgs(args)
     val filename = getFileNameFromArgs(args)
-    
-    // Parse source code
-    val sourceCode = scala.io.Source.fromFile(filename).mkString
+
+    // Parse source code with proper resource cleanup and error handling
+    val sourceCode = try {
+      val source = scala.io.Source.fromFile(filename)
+      try {
+        source.mkString
+      } finally {
+        source.close()
+      }
+    } catch {
+      case e: java.io.FileNotFoundException =>
+        println(s"ERROR: File not found: $filename")
+        println("WHAT THE FUCK DID I DO WRONG!")
+        return
+      case e: java.io.IOException =>
+        println(s"ERROR: Failed to read file: $filename")
+        println(s"Details: ${e.getMessage}")
+        println("YOU SHOULD NOT DRINK AND BAKE!")
+        return
+    }
+
     val parser = new ArnoldParserExtended()
     val root = parser.parse(sourceCode)
     

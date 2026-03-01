@@ -5,6 +5,13 @@ import org.objectweb.asm.{MethodVisitor, ClassWriter}
 import org.arnoldc.{MethodInformation, SymbolTable}
 import org.arnoldc.native.NativeGenerator
 
+/**
+ * Root AST Node
+ * "IT'S SHOWTIME" - The top-level program structure
+ *
+ * Represents a complete ArnoldC program with global declarations
+ * and method definitions. Can generate either JVM bytecode or native code.
+ */
 case class RootNode(globals: List[AstNode], methods: List[AbstractMethodNode]) extends AstNode {
 
   // Original JVM bytecode generation

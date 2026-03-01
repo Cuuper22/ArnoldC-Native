@@ -12,10 +12,11 @@ import org.arnoldc.native.NativeGenerator
 class NativeGeneratorSpec extends AnyFlatSpec with Matchers {
 
   val parser = new ArnoldParserExtended()
-  val generator = new NativeGenerator()
 
   def compile(code: String): String = {
     val ast = parser.parse(code)
+    // Create a new generator instance for each test to avoid state leakage
+    val generator = new NativeGenerator()
     generator.generateC(ast, "Test")
   }
 

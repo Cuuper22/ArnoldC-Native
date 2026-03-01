@@ -4,6 +4,14 @@ import org.parboiled.scala._
 import org.parboiled.errors.{ErrorUtils, ParsingException}
 import org.arnoldc.ast._
 
+/**
+ * Original ArnoldC Parser
+ * "LISTEN TO ME VERY CAREFULLY" - Parses original ArnoldC syntax
+ *
+ * Implements a PEG parser using Parboiled for the original ArnoldC language.
+ * Supports basic features: variables, arithmetic, control flow, and methods.
+ * For extended syntax (native features), see ArnoldParserExtended.
+ */
 class ArnoldParser extends Parser {
 
   val ParseError = "WHAT THE FUCK DID I DO WRONG"

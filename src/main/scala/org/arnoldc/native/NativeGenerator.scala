@@ -644,13 +644,13 @@ class NativeGenerator {
     case LessThanOrEqualNode(left, right) =>
       s"(${generateExpression(left)} <= ${generateExpression(right)})"
       
-    // ===== LOGICAL =====
-      
+    // ===== LOGICAL (using bitwise ops to match JVM backend) =====
+
     case OrNode(left, right) =>
-      s"(${generateExpression(left)} || ${generateExpression(right)})"
-      
+      s"(${generateExpression(left)} | ${generateExpression(right)})"
+
     case AndNode(left, right) =>
-      s"(${generateExpression(left)} && ${generateExpression(right)})"
+      s"(${generateExpression(left)} & ${generateExpression(right)})"
       
     case LogicalNotNode(operand) =>
       s"(!${generateExpression(operand)})"

@@ -3,6 +3,14 @@ package org.arnoldc.native
 import org.arnoldc.ast._
 import scala.collection.mutable
 
+/**
+ * x86 Assembly Generator
+ * "DO IT NOW" - Direct assembly code generation for bare metal
+ *
+ * Generates x86 assembly (NASM syntax) from the ArnoldC AST.
+ * Outputs .asm files that can be assembled with NASM for
+ * freestanding/kernel applications.
+ */
 class AsmGenerator {
 
   private val asm = new StringBuilder
