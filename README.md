@@ -1,121 +1,89 @@
+## Why
+
+I wanted to write an operating system in ArnoldC — the language where every keyword is an Arnold Schwarzenegger movie quote. Problem: ArnoldC only compiles to JVM bytecode. You can't boot an OS on the JVM.
+
+So I forked the compiler and added native code generation. Three new backends: freestanding C, x86 assembly, and full kernel packages. Then I added 36 new keywords for the things an OS needs — memory allocation (`I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MEMORY`), interrupt control (`EVERYBODY CHILL`), port I/O (`TALK TO THE PORT`), inline assembly, bitwise operations.
+
+The result: [ToaruOS-Arnold](https://github.com/Cuuper22/ToaruOS-Arnold), a 22,000-line bare-metal desktop OS compiled entirely through this fork. The compiler turned a joke language into something that can drive a TCP/IP stack.
+
 # ArnoldC-Native
 
-```
-    _    ____  _   _  ___  _     ____   ____   _   _    _  _____ _____     _______ 
-   / \  |  _ \| \ | |/ _ \| |   |  _ \ / ___| | \ | |  / \|_   _|_ _\ \   / / ____|
-  / _ \ | |_) |  \| | | | | |   | | | | |     |  \| | / _ \ | |  | | \ \ / /|  _|  
- / ___ \|  _ <| |\  | |_| | |___| |_| | |___  | |\  |/ ___ \| |  | |  \ V / | |___ 
-/_/   \_\_| \_\_| \_|\___/|_____|____/ \____| |_| \_/_/   \_\_| |___|  \_/  |_____|
-                                                                                   
-              FORK WITH NATIVE CODE GENERATION - "I'LL BE BACK"
-```
+Fork of [ArnoldC](https://github.com/lhartikk/ArnoldC) with native x86 code generation. All original programs work unchanged — the new backends and keywords are additive.
 
-## What Is This?
+Built to compile [ToaruOS-Arnold](https://github.com/Cuuper22/ToaruOS-Arnold).
 
-This is a **fork of ArnoldC** that adds native code generation capabilities. Instead of only outputting JVM bytecode, this version can generate:
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-- **Freestanding C code** for bare-metal programming
-- **x86 Assembly** for direct hardware control
-- **Complete kernel packages** ready to boot
-
-## New Compiler Options
+## What it adds
 
 ```bash
 # Original JVM bytecode (unchanged)
 arnoldc hello.arnoldc           # → hello.class
 
-# NEW: Generate C code
+# NEW: Generate freestanding C code
 arnoldc -native hello.arnoldc   # → hello.c
 
-# NEW: Generate x86 assembly  
+# NEW: Generate x86 assembly
 arnoldc -asm hello.arnoldc      # → hello.asm
 
 # NEW: Generate full kernel package
 arnoldc -kernel mykernel.arnoldc
 ```
 
-## New Keywords for Kernel Programming
+## New keywords
 
-We've added Arnold quotes for systems programming:
+36 new Arnold quotes for systems programming:
 
-### Memory Operations
-| Keyword | C Equivalent | Arnold Quote Origin |
-|---------|--------------|---------------------|
+<details>
+<summary>Memory operations</summary>
+
+| Keyword | C Equivalent | Source |
+|---------|-------------|--------|
 | `I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MEMORY` | `malloc()` | Terminator |
 | `YOU'RE LUGGAGE` | `free()` | Commando |
 | `WHAT'S WRONG WITH YOUR EYES` | `*(ptr)` read | Total Recall |
 | `SEE YOU AT THE PARTY` | `*(ptr) =` write | Total Recall |
 
-### I/O Port Operations
-| Keyword | C Equivalent | Arnold Quote Origin |
-|---------|--------------|---------------------|
-| `TALK TO THE PORT` | `outb(port, val)` | - |
-| `LISTEN TO THE PORT` | `inb(port)` | - |
+</details>
 
-### Interrupt Control
-| Keyword | C Equivalent | Arnold Quote Origin |
-|---------|--------------|---------------------|
-| `EVERYBODY CHILL` | `cli` (disable IRQ) | Batman & Robin |
-| `LET'S PARTY` | `sti` (enable IRQ) | - |
-| `SLEEP NOW` | `hlt` | - |
+<details>
+<summary>I/O, interrupts, bitwise</summary>
 
-### Bitwise Operations
-| Keyword | C Equivalent | Arnold Quote Origin |
-|---------|--------------|---------------------|
-| `CRUSH THEM` | `&` (AND) | - |
-| `JOIN THEM` | `\|` (OR) | - |
-| `CONFUSE THEM` | `^` (XOR) | - |
-| `PUSH LEFT` | `<<` | - |
-| `PUSH RIGHT` | `>>` | - |
-
-### Inline Assembly
 | Keyword | C Equivalent |
-|---------|--------------|
+|---------|-------------|
+| `TALK TO THE PORT` | `outb(port, val)` |
+| `LISTEN TO THE PORT` | `inb(port)` |
+| `EVERYBODY CHILL` | `cli` (disable IRQ) |
+| `LET'S PARTY` | `sti` (enable IRQ) |
+| `SLEEP NOW` | `hlt` |
+| `CRUSH THEM` | `&` (AND) |
+| `JOIN THEM` | `\|` (OR) |
+| `CONFUSE THEM` | `^` (XOR) |
+| `PUSH LEFT` / `PUSH RIGHT` | `<<` / `>>` |
+
+</details>
+
+<details>
+<summary>Inline assembly, enums, preprocessor, comparisons</summary>
+
+| Keyword | C Equivalent |
+|---------|-------------|
 | `SPEAK TO THE MACHINE` | `__asm__("...")` |
-| `THE MACHINE SAYS` | End of asm block |
-
-### Enums
-| Keyword | C Equivalent |
-|---------|--------------|
-| `THESE ARE MY OPTIONS` | `enum name {` |
-| `OPTION` | Enum value |
-| `NO MORE OPTIONS` | `}` |
-
-### Preprocessor
-| Keyword | C Equivalent |
-|---------|--------------|
+| `THESE ARE MY OPTIONS` / `OPTION` | `enum` |
 | `LET ME TELL YOU SOMETHING` | `#define` |
 | `BRING IN` | `#include` |
-| `IF YOU KNOW` | `#ifdef` |
-| `IF YOU DON'T KNOW` | `#ifndef` |
-| `THAT'S ALL I KNOW` | `#endif` |
-| `ONLY ONCE` | `#pragma once` |
-
-### Comments
-| Keyword | C Equivalent |
-|---------|--------------|
-| `TALK TO YOURSELF "..."` | `/* ... */` |
-| `LET ME THINK ABOUT THIS` | `/*` multiline |
-| `I'VE THOUGHT ABOUT IT` | `*/` end |
-
-### Comparisons
-| Keyword | C Equivalent |
-|---------|--------------|
-| `YOU ARE NOT YOU YOU ARE ME` | `==` |
-| `YOU ARE NOT ME` | `!=` |
+| `IF YOU KNOW` / `IF YOU DON'T KNOW` | `#ifdef` / `#ifndef` |
 | `LET OFF SOME STEAM BENNET` | `>` |
-| `YOU'RE AT LEAST AS BIG AS` | `>=` |
 | `YOU'RE NOT BIG ENOUGH` | `<` |
-| `YOU'RE NOT BIGGER THAN` | `<=` |
 | `THAT'S A LIE` | `!` (logical NOT) |
 | `TURN IT AROUND` | `~` (bitwise NOT) |
 
-## Example: Real Kernel in ArnoldC
+</details>
+
+## Example: kernel in ArnoldC
 
 ```arnoldc
 IT'S SHOWTIME
-
-TALK TO THE HAND "ArnoldC Kernel Booting..."
 
 HEY CHRISTMAS TREE vgaBuffer
 YOU SET US UP 753664
@@ -123,201 +91,80 @@ YOU SET US UP 753664
 HEY CHRISTMAS TREE character
 YOU SET US UP 65
 
-EVERYBODY CHILL
-
-SEE YOU AT THE PARTY vgaBuffer character
-
-LET'S PARTY
-
-TALK TO THE HAND "Kernel initialized!"
-
-SLEEP NOW
+EVERYBODY CHILL                        ; disable interrupts
+SEE YOU AT THE PARTY vgaBuffer character  ; write 'A' to VGA memory
+LET'S PARTY                            ; enable interrupts
+SLEEP NOW                              ; halt CPU
 
 YOU HAVE BEEN TERMINATED
 ```
 
-This compiles to actual kernel code that:
-1. Disables interrupts
-2. Writes 'A' to VGA memory (0xB8000)
-3. Enables interrupts
-4. Halts the CPU
-
-## Building
-
-### Prerequisites
-
-```bash
-# Ubuntu/Debian
-sudo apt install openjdk-11-jdk scala sbt
-
-# Build the compiler
-sbt assembly
-```
-
-### Running Tests
-
-```bash
-# Run the test suite
-sbt test
-```
-
-Tests cover:
-- Parser tests for all syntax features
-- Code generator tests for C output
-- Type system tests
-- Control flow tests
-- Bitwise operation tests
-
-### Usage
-
-```bash
-# Compile your ArnoldC kernel
-java -jar ArnoldC-Native.jar -kernel mykernel.arnoldc
-
-# This generates:
-#   - mykernel_kernel.c     (C code)
-#   - arnold_runtime.h      (Runtime header)
-#   - Makefile              (Build system)
-
-# Build the kernel (requires cross-compiler)
-make
-
-# Run in QEMU
-make run
-```
+This compiles to a bootable kernel that writes 'A' to VGA memory at 0xB8000.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    ArnoldC Source                       │
-│              IT'S SHOWTIME ... TERMINATED               │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    ArnoldParser                         │
-│                   (Parboiled PEG)                       │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    Abstract Syntax Tree                 │
-│            RootNode → MethodNode → StatementNode        │
-└─────────────────────────────────────────────────────────┘
-                           │
-              ┌────────────┼────────────┐
-              ▼            ▼            ▼
-┌───────────────────┐ ┌─────────┐ ┌─────────────┐
-│  JVM Generator    │ │ Native  │ │ ASM         │
-│  (Original ASM)   │ │ Gen (C) │ │ Generator   │
-└───────────────────┘ └─────────┘ └─────────────┘
-              │            │            │
-              ▼            ▼            ▼
-         .class         .c          .asm
-         (JVM)      (GCC/Clang)    (NASM)
-                         │            │
-                         └─────┬──────┘
-                               ▼
-                    ┌─────────────────┐
-                    │  Kernel Binary  │
-                    │   (Bootable!)   │
-                    └─────────────────┘
+┌──────────────────────────────────────┐
+│          ArnoldC Source              │
+│   IT'S SHOWTIME ... TERMINATED      │
+└──────────────────────┬───────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────┐
+│      ArnoldParser (Parboiled PEG)    │
+└──────────────────────┬───────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────┐
+│         Abstract Syntax Tree         │
+│   RootNode → MethodNode → Statement  │
+└──────┬───────────┬───────────┬───────┘
+       │           │           │
+       ▼           ▼           ▼
+  ┌─────────┐ ┌─────────┐ ┌─────────┐
+  │   JVM   │ │ Native  │ │   ASM   │
+  │ (orig)  │ │  (C)    │ │ (x86)   │
+  └────┬────┘ └────┬────┘ └────┬────┘
+       │           │           │
+       ▼           ▼           ▼
+    .class       .c          .asm
+               (GCC)       (NASM)
+                 └─────┬─────┘
+                       ▼
+              Bootable Kernel
 ```
 
-## How It Works
+## Building
 
-1. **Parsing**: Same Parboiled parser as original ArnoldC
-2. **AST**: Extended with new node types for kernel ops
-3. **Code Generation**: New `NativeGenerator` class that:
-   - Walks the AST
-   - Outputs freestanding C code
-   - Maps Arnold quotes to C constructs
-4. **Compilation**: GCC cross-compiler builds native binary
-5. **Linking**: Custom linker script places code at 1MB
-6. **Booting**: GRUB or direct QEMU multiboot
+```bash
+# Prerequisites: Java 11+, sbt
+sbt assembly
 
-## Why Fork Instead of Transpile?
+# Use the compiler
+java -jar target/scala-2.13/ArnoldC-Native.jar -kernel mykernel.arnoldc
 
-1. **Single tool** - One compiler, multiple backends
-2. **Proper AST** - Work with parsed structure, not text
-3. **Extensible** - Easy to add new keywords
-4. **Maintainable** - Changes to parser benefit all backends
-5. **Authentic** - It's still ArnoldC, just enhanced
+# Run tests
+sbt test
+```
+
+## Known limitations
+
+**JVM backend:** New native-mode keywords (memory ops, port I/O, inline assembly) fail in JVM mode. Use `-native`, `-asm`, or `-kernel` flags for extended features.
+
+**AST coverage:** The codebase defines ~194 AST node classes, but only ~46 have parser rules. The remaining ~150 are planned extensions (advanced bitwise, CPU instructions, type system, etc.) — defined but not yet parseable. See `src/main/scala/org/arnoldc/ast/AstNode.scala` for the full list.
+
+**Kernel mode:** Generated Makefiles require `i686-elf-gcc` cross-compiler and may need customization for your kernel. Linker scripts are not auto-generated.
 
 ## Compatibility
 
-- All original ArnoldC programs work unchanged
-- New keywords only needed for kernel-specific ops
-- JVM output identical to original compiler
-- `-native` and `-kernel` are additive features
+All original ArnoldC programs work unchanged. New keywords only activate with `-native`/`-asm`/`-kernel` flags. JVM output is identical to the original compiler.
 
-## Known Limitations
+## Credits
 
-### JVM Backend Compatibility
-- The JVM backend (default mode, `-run`) only supports **original ArnoldC syntax**
-- New native-mode keywords (memory ops, port I/O, inline assembly, etc.) will **fail** in JVM mode
-- To use extended features, you must compile with `-native`, `-asm`, or `-kernel` flags
-- Reason: JVM bytecode cannot represent raw memory access or hardware instructions
-
-### Planned But Unparseable AST Nodes
-- The codebase defines ~194 AST node classes, but only ~46 have parser rules
-- The remaining ~150 nodes are **planned future extensions** and currently unparseable
-- Categories of planned nodes (not yet implemented in parser):
-  - Advanced bitwise operations (bit set/clear/toggle, masks, rotation, population count)
-  - CPU-specific instructions (CPUID, RDTSC, RDMSR, WRMSR, control register access)
-  - Advanced control flow (else-if chains, infinite loops, panic/assert)
-  - Function attributes (inline, noreturn, aligned, static, section, ISR handlers)
-  - Advanced preprocessor directives (elif, conditional compilation, line directives)
-  - Advanced assembly (page table operations, memory fences, TLB invalidation)
-  - Type system extensions (typedefs, bitfields, packed structs, anonymous structs)
-  - Advanced arrays (dynamic arrays, slices, nested initializers, extern declarations)
-  - Callback registration system
-  - Documentation comments
-- See `src/main/scala/org/arnoldc/ast/AstNode.scala` for the full list
-- **If you need these features**, you must add parser rules to `ArnoldParserExtended.scala`
-
-### Kernel Mode Limitations
-- Kernel mode (`-kernel` flag) generates a Makefile that requires:
-  - `i686-elf-gcc` cross-compiler (not standard GCC)
-  - `linker.ld` file (must be created manually - not auto-generated)
-  - NASM assembler for any assembly components
-- The generated Makefile is a template and may need customization for your kernel
-- QEMU testing (`make run`) assumes a multiboot-compatible kernel structure
-
-### Current Working Feature Set
-- For the **definitive list of working keywords**, see the tables in the README
-- All keywords in the "New Keywords for Kernel Programming" section work in `-native`/`-asm`/`-kernel` modes
-- Original ArnoldC keywords work in all modes (JVM and native)
-
-## Contributing
-
-1. Fork this repo
-2. Add your Arnold quotes
-3. Implement the AST node
-4. Add to NativeGenerator
-5. Submit PR with "I'LL BE BACK"
+- **Original ArnoldC** — [Lauri Hartikka](https://github.com/lhartikk)
+- **Native code generation** — [Cuuper22](https://github.com/Cuuper22)
+- **Used by** — [ToaruOS-Arnold](https://github.com/Cuuper22/ToaruOS-Arnold) (22K-line bare-metal OS)
 
 ## License
 
 Apache 2.0 (same as original ArnoldC)
-
----
-
-```
-"Come with me if you want to boot." - ArnoldC Kernel
-
-"I'll be back." - Every kernel after a reboot
-
-"Consider that a divorce." - When unmounting filesystems
-
-"Get to the chopper!" - Memory allocation
-
-"You have been terminated." - Process exit
-```
-
-## Credits
-
-- **Original ArnoldC**: Lauri Hartikk
-- **Native Extension**: Claude Code
-- **Inspiration**: The Governator himself
